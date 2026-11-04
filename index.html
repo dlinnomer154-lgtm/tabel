@@ -1,0 +1,3665 @@
+<!DOCTYPE html>
+<html lang="ru"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwMDkxNTk0ODgzNzc1NzQ0ODMzMCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzlkODU2NzFkZmNlMDA0MDNfaW5kZXguaHRtbC0zNzUifSwiZXhwIjoxNzkzODE0Nzc0LCJpYXQiOjE3OTM4MTExNzQsImFsZyI6IlJTMjU2In0.X7z4dnLX0WgRBZ4vSnRQN4wR1fra4gTiVyMKyDv9-D7iY3maby8ehWA3DtSS1XMbU6qvUxfa6-IfwADH7VEFXZ5pc-9hXNAwJg8UUhg4CrRYJ5l26jsJdBRZi2spKYuuRzNFrPWlNULtZgV0vypiH5KULsDAnR-fNlUFxFCVRp-y7PpjyNxqWbC_VyPzgURbA9oW1kMDmeCByBXR0laY71Awx8SxWN693lqrOYoXFYSF1qeqlZB21ysdMwd_yYAtDCayF742bPeU3lzZMkzPJcN98YsPtj-Q2vPZmUJCUXzndyi9iLp0M0bye7Nw1Q8J0SVK7r3HbpuI5GVp43rH2g","c_9d85671dfce00403_index.html-375")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Учёт смен &amp; Табель</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet">
+  
+  <!-- Мета-теги для запуска как мобильного приложения (PWA) на Android -->
+  <meta name="theme-color" content="#0b1120">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Табель Онлайн">
+  
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card-bg: #151f32;
+      --card-border: #28354d;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --success-hover: #15803d;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --warning: #f59e0b;
+      --accent: #0284c7;
+      --weekend-head: #1e3a8a;
+      --weekend-cell: #172554;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Верхняя панель */
+    header {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .brand h1 {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .brand p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-download-html {
+      padding: 6px 12px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      background: #111827;
+      padding: 4px;
+      border-radius: 10px;
+    }
+
+    .nav-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Основная область */
+    main {
+      flex: 1;
+      padding: 16px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .view-container {
+      display: none;
+    }
+
+    .view-container.active {
+      display: block;
+    }
+
+    /* Мобильный экран бригадира */
+    .mobile-foreman {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mobile-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .mode-btn {
+      padding: 12px 6px;
+      border-radius: 10px;
+      border: 2px solid #28354d;
+      background: #0b1120;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .mode-btn.active-start {
+      border-color: var(--success);
+      background: rgba(22, 163, 74, 0.15);
+      color: #4ade80;
+    }
+
+    .mode-btn.active-stop {
+      border-color: var(--danger);
+      background: rgba(220, 38, 38, 0.15);
+      color: #f87171;
+    }
+
+    .mode-btn.active-manual {
+      border-color: var(--accent);
+      background: rgba(2, 132, 199, 0.15);
+      color: #38bdf8;
+    }
+
+    .objects-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .object-pill {
+      padding: 10px 16px;
+      background: #0b1120;
+      border: 1.5px solid #28354d;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #e2e8f0;
+      transition: all 0.15s;
+    }
+
+    .object-pill.selected {
+      background: var(--primary);
+      border-color: #60a5fa;
+      color: #fff;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .custom-input {
+      flex: 1;
+      background: #0b1120;
+      border: 1.5px solid #28354d;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .custom-input:focus {
+      border-color: var(--primary);
+    }
+
+    .select-all-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-small {
+      padding: 8px 12px;
+      background: #28354d;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .workers-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 48vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .worker-card {
+      background: #0b1120;
+      border: 2px solid #28354d;
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+
+    .worker-card.checked {
+      border-color: var(--primary);
+      background: rgba(37, 99, 235, 0.15);
+    }
+
+    .worker-card.on-shift {
+      border-left: 6px solid var(--success);
+    }
+
+    .worker-info-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .worker-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .worker-id-badge {
+      background: #28354d;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .worker-role {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .worker-shift-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: #4ade80;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .custom-checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #64748b;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      background: #151f32;
+    }
+
+    .worker-card.checked .custom-checkbox {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 18px;
+      border-radius: var(--radius);
+      border: none;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      transition: transform 0.1s;
+    }
+
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color: #fff;
+    }
+
+    .btn-stop {
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      color: #fff;
+    }
+
+    .btn-save-manual {
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: #fff;
+    }
+
+    /* Шахматка табеля */
+    .admin-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      background: var(--card-bg);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+    }
+
+    .cal-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cal-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0b1120;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cal-title {
+      font-size: 17px;
+      font-weight: 800;
+      min-width: 180px;
+      text-align: center;
+      color: #38bdf8;
+    }
+
+    .period-filter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .custom-select {
+      background: #0b1120;
+      border: 1.5px solid #28354d;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .actions-export {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-export {
+      padding: 9px 14px;
+      background: #047857;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid #28354d;
+      border-radius: 12px;
+      background: #0b1120;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+
+    table.matrix-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    table.matrix-table th, table.matrix-table td {
+      border: 1px solid #28354d;
+      padding: 5px 6px;
+      text-align: center;
+    }
+
+    table.matrix-table thead tr:first-child th {
+      background: #151f32;
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 4px;
+    }
+
+    table.matrix-table thead tr:nth-child(2) th {
+      background: #0b1120;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    th.weekend-col, td.weekend-col {
+      background: var(--weekend-cell) !important;
+      color: #93c5fd !important;
+    }
+
+    th.weekend-head {
+      background: var(--weekend-head) !important;
+      color: #fff !important;
+    }
+
+    .sticky-col-1 {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background: #151f32;
+      font-weight: 700;
+      min-width: 120px;
+      text-align: left !important;
+      padding-left: 10px !important;
+    }
+
+    .sticky-col-2 {
+      position: sticky;
+      left: 120px;
+      z-index: 10;
+      background: #151f32;
+      color: #94a3b8;
+      font-size: 11px;
+      min-width: 110px;
+      text-align: left !important;
+      padding-left: 8px !important;
+    }
+
+    .sticky-col-3 {
+      position: sticky;
+      left: 230px;
+      z-index: 10;
+      background: #151f32;
+      color: #cbd5e1;
+      font-size: 11px;
+      min-width: 95px;
+      text-align: left !important;
+      padding-left: 8px !important;
+    }
+
+    tr.row-object td {
+      background: rgba(254, 240, 138, 0.08);
+      color: #fde047;
+      font-weight: 600;
+    }
+
+    tr.row-time td {
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    tr.row-total td {
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    tr.row-overtime td {
+      color: #f87171;
+      font-weight: 600;
+    }
+
+    tr.row-earned td {
+      color: #4ade80;
+      font-weight: 700;
+    }
+
+    .summary-head {
+      background: #312e81 !important;
+      color: #e0e7ff !important;
+      font-weight: 700;
+    }
+
+    .summary-cell {
+      background: #1e1b4b !important;
+      font-weight: 800;
+      color: #c7d2fe;
+    }
+
+    td.editable-day {
+      cursor: pointer;
+    }
+
+    td.editable-day:hover {
+      outline: 2px solid var(--accent);
+      background: rgba(2, 132, 199, 0.2) !important;
+    }
+
+    /* Ставки и ссылки */
+    .links-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .links-table th, .links-table td {
+      padding: 12px 14px;
+      border: 1px solid var(--card-border);
+      text-align: left;
+    }
+
+    .links-table th {
+      background: #0b1120;
+      color: var(--text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .rate-input {
+      width: 100px;
+      padding: 6px 10px;
+      background: #0b1120;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: #4ade80;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .copy-link-btn {
+      padding: 6px 10px;
+      background: #28354d;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #151f32;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 440px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .gps-info-box {
+      background: #0b1120;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .gps-link-btn {
+      color: #38bdf8;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #2563eb;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+      z-index: 200;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Верхняя шапка -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">⚡</div>
+      <div>
+        <h1>Учёт смен &amp; Табель</h1>
+        <p id="headerSubtitle">Сегодня: 4 Ноябрь 2026</p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn-download-html" onclick="downloadHtmlFile()">💾 Скачать index.html</button>
+      <div class="nav-tabs" id="navTabs">
+        <button class="nav-btn active" onclick="switchTab('foreman')">📱 Бригадир</button>
+        <button class="nav-btn" onclick="switchTab('certificates')" id="btnTabCertificates">📋 Сертификаты</button>
+        <button class="nav-btn" onclick="switchTab('receipts')" id="btnTabReceipts">🧾 Чеки</button>
+        <button class="nav-btn" onclick="switchTab('matrix')" id="btnTabMatrix">📊 Табель</button>
+        <button class="nav-btn" onclick="switchTab('settings')" id="btnTabSettings">🔑 Ставки &amp; Ссылки</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ==============================================================
+         1. ЭКРАН БРИГАДИРА (ANDROID)
+         ============================================================== -->
+    <div id="view-foreman" class="view-container active">
+      <div class="mobile-foreman">
+
+        <!-- Кнопки быстрых действий -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button class="action-btn" style="padding: 12px; font-size: 13px; background: #334155; border: 1px solid #475569;" onclick="openReceiptModal()">
+            🧾 + ЧЕК РАСХОДА
+          </button>
+          <button class="action-btn" style="padding: 12px; font-size: 13px; background: #0369a1; border: 1px solid #0284c7;" onclick="openCertModal()">
+            📋 + ПАСПОРТ / СЕРТИФИКАТ
+          </button>
+        </div>
+
+        <!-- Карточка смены -->
+        <div class="mobile-card">
+          <div class="card-title">
+            <span>📅 Текущая смена</span>
+            <span id="foremanCurrentDate" style="color: #38bdf8; font-weight: 700;">4 Ноябрь 2026 (СР)</span>
+          </div>
+
+          <!-- Режимы: СТАРТ / ФИНИШ / ВРУЧНУЮ -->
+          <div class="mode-switch">
+            <button class="mode-btn active-start" id="modeBtnStart" onclick="setShiftMode('start')">☀️ СТАРТ</button>
+            <button class="mode-btn" id="modeBtnStop" onclick="setShiftMode('stop')">🌙 ФИНИШ</button>
+            <button class="mode-btn" id="modeBtnManual" onclick="setShiftMode('manual')">⏱ ВРУЧНУЮ</button>
+          </div>
+
+          <!-- Поле ввода заявленного времени с кнопкой "Сейчас" -->
+          <div id="shiftDeclaredTimeBlock" style="margin-bottom: 12px; background: #0b1120; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #28354d;">
+            <label id="declaredTimeLabel" style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px;">
+              🕒 Время начала работы на объекте:
+            </label>
+            <div style="display: flex; gap: 8px;">
+              <input type="time" id="declaredTimeInput" class="custom-input" style="padding: 8px 12px; font-family: var(--font-mono); font-size: 16px; font-weight: 700;">
+              <button class="btn-small" type="button" onclick="setDeclaredTimeToCurrent()" style="padding: 0 14px;">Сейчас</button>
+            </div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 4px;">
+              * Если забыли отметиться вовремя, укажите реальное время начала работы
+            </div>
+          </div>
+
+          <!-- Выбор объекта -->
+          <div id="objectSelectBlock">
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">ВЫБЕРИТЕ ОБЪЕКТ:</div>
+            <div class="objects-grid" id="objectsPillList">
+          <div style="font-size: 12px; color: #64748b; padding: 4px 0;">
+            Объекты не добавлены. Введите название ниже и нажмите OK.
+          </div>
+        </div>
+            <div class="input-row">
+              <input type="text" id="customObjectInput" class="custom-input" placeholder="+ Добавить новый объект">
+              <button class="btn-small" onclick="addNewObject()" style="padding: 0 16px;">OK</button>
+            </div>
+          </div>
+
+          <!-- Ручной режим -->
+          <div id="manualTimeBlock" style="display: none; margin-top: 14px; border-top: 1px dashed #28354d; padding-top: 12px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+              <div>
+                <label style="font-size: 11px; color: var(--text-muted);">Число:</label>
+                <input type="number" id="manualDay" class="custom-input" min="1" max="31" value="1" style="padding: 8px;">
+              </div>
+              <div>
+                <label style="font-size: 11px; color: var(--text-muted);">Приход:</label>
+                <input type="time" id="manualTimeStart" class="custom-input" value="08:00" style="padding: 8px;">
+              </div>
+              <div>
+                <label style="font-size: 11px; color: var(--text-muted);">Уход:</label>
+                <input type="time" id="manualTimeEnd" class="custom-input" value="18:30" style="padding: 8px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Фотоотчет за смену (для ФИНИША) -->
+        <div class="mobile-card" id="shiftPhotoCard" style="display: none;">
+          <div class="card-title">
+            <span>📷 Фотоотчет за смену</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+            Прикрепите фото объекта или выполненных работ:
+          </div>
+          <input type="file" id="shiftPhotoInput" accept="image/*" capture="environment" style="display: none;" onchange="handleShiftPhotoSelected(event)">
+          <button class="btn-small" style="width: 100%; padding: 12px; background: #1e293b; border: 1.5px dashed #475569;" onclick="document.getElementById('shiftPhotoInput').click()">
+            📸 Сделать снимок с камеры
+          </button>
+          <div id="shiftPhotoPreviewBox" style="display: none; margin-top: 10px; text-align: center;">
+            <img id="shiftPhotoPreviewImg" src="" style="max-height: 160px; border-radius: 8px; border: 1px solid #475569;">
+          </div>
+        </div>
+
+        <!-- Список работников на объекте -->
+        <div class="mobile-card">
+          <div class="select-all-bar">
+            <span style="font-size: 13px; font-weight: 700;">РАБОТНИКИ НА СМЕНЕ:</span>
+            <button class="btn-small" onclick="toggleSelectAll()">Выбрать всех</button>
+          </div>
+          <div class="workers-list" id="workersListMobile">
+          <div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">
+            Работники пока не добавлены.<br>Перейдите во вкладку «🔑 Ставки &amp; Ссылки», чтобы внести бригаду.
+          </div>
+        </div>
+        </div>
+
+        <!-- Главная кнопка действия -->
+        <button id="mainActionBtn" class="action-btn btn-start" onclick="executeShiftAction()">
+          <span>☀️ СТАРТ СМЕНЫ</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ==============================================================
+         2. РЕЕСТР ПАСПОРТОВ И СЕРТИФИКАТОВ
+         ============================================================== -->
+    <div id="view-certificates" class="view-container">
+      <div class="admin-bar">
+        <div style="font-weight: 800; font-size: 16px; color: #38bdf8;">📋 Реестр сертификатов и паспортов</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <select id="certFilterObject" class="custom-select" onchange="renderCertsRegistry()"><option value="all">Все объекты</option></select>
+          <input type="text" id="certSearchInput" class="custom-input" placeholder="Поиск по материалу..." style="padding: 7px 12px; font-size: 12px;" oninput="renderCertsRegistry()">
+          <button class="btn-export" onclick="exportCertsToCsv()">📥 Экспорт реестра (CSV)</button>
+          <button class="btn-small" style="background: #0284c7; padding: 0 14px;" onclick="openCertModal()">+ Добавить</button>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="matrix-table" style="font-size: 13px;">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Объект</th>
+              <th>Материал / Оборудование</th>
+              <th>Тип и № документа</th>
+              <th>Поставщик / Завод</th>
+              <th>Кто внёс</th>
+              <th>Примечание</th>
+              <th>Фото</th>
+              <th>Действие</th>
+            </tr>
+          </thead>
+          <tbody id="certsTableBody"><tr><td colspan="9" style="padding: 24px; color: var(--text-muted); text-align: center;">Паспорта и сертификаты пока не добавлены</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==============================================================
+         3. РЕЕСТР ЧЕКОВ И РАСХОДОВ
+         ============================================================== -->
+    <div id="view-receipts" class="view-container">
+      <div class="admin-bar">
+        <div>
+          <span style="font-weight: 800; font-size: 16px; color: #fde047;">🧾 Реестр чеков и расходов</span>
+          <span style="margin-left: 14px; font-size: 14px; font-weight: 700; color: #4ade80;">Итого: <span id="receiptTotalSum">0 ₽</span></span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <select id="receiptFilterObject" class="custom-select" onchange="renderReceiptsRegistry()"><option value="all">Все объекты</option></select>
+          <select id="receiptFilterCategory" class="custom-select" onchange="renderReceiptsRegistry()">
+            <option value="all">Все категории</option>
+            <option value="ГСМ / Топливо">ГСМ / Топливо</option>
+            <option value="Расходники / Крепёж">Расходники / Крепёж</option>
+            <option value="Инструмент">Инструмент</option>
+            <option value="Питание">Питание</option>
+            <option value="Хознужды">Хознужды</option>
+            <option value="Прочее">Прочее</option>
+          </select>
+          <button class="btn-export" onclick="exportReceiptsToCsv()">📥 Экспорт чеков (CSV)</button>
+          <button class="btn-small" style="background: #475569; padding: 0 14px;" onclick="openReceiptModal()">+ Добавить</button>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="matrix-table" style="font-size: 13px;">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Объект</th>
+              <th>Категория</th>
+              <th>Сумма</th>
+              <th>Кто загрузил</th>
+              <th>Примечание</th>
+              <th>Фото чека</th>
+              <th>Действие</th>
+            </tr>
+          </thead>
+          <tbody id="receiptsTableBody"><tr><td colspan="8" style="padding: 24px; color: var(--text-muted); text-align: center;">Чеки пока не добавлены</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==============================================================
+         4. ТАБЕЛЬ (ШАХМАТКА)
+         ============================================================== -->
+    <div id="view-matrix" class="view-container">
+      <div class="admin-bar">
+        <div class="cal-controls">
+          <button class="cal-btn" onclick="changeMonth(-1)">◀</button>
+          <div class="cal-title" id="calMonthTitle">Ноябрь 2026</div>
+          <button class="cal-btn" onclick="changeMonth(1)">▶</button>
+        </div>
+
+        <div class="period-filter">
+          <label style="font-size: 13px; color: var(--text-muted);">Период:</label>
+          <select id="periodFilterSelect" class="custom-select" onchange="renderMatrixTable()">
+            <option value="all">Весь месяц (1–31)</option>
+            <option value="w1">Неделя 1 (1–7)</option>
+            <option value="w2">Неделя 2 (8–14)</option>
+            <option value="w3">Неделя 3 (15–21)</option>
+            <option value="w4">Неделя 4 (22–28)</option>
+            <option value="w5">Неделя 5 (29–31)</option>
+          </select>
+        </div>
+
+        <div class="actions-export">
+          <button class="btn-export" onclick="exportToExcel()">📥 Выгрузить Excel (CSV)</button>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="matrix-table" id="mainMatrixTable">
+        <thead>
+          <tr>
+            <th rowspan="2" class="sticky-col-1">Сотрудник</th>
+            <th rowspan="2" class="sticky-col-2">Должность</th>
+            <th rowspan="2" class="sticky-col-3">Параметр</th>
+      
+          <th colspan="2" class="weekend-head">
+            ВС
+          </th>
+        
+          <th colspan="2" class="">
+            ПН
+          </th>
+        
+          <th colspan="2" class="">
+            ВТ
+          </th>
+        
+          <th colspan="2" class="">
+            СР
+          </th>
+        
+          <th colspan="2" class="">
+            ЧТ
+          </th>
+        
+          <th colspan="2" class="">
+            ПТ
+          </th>
+        
+          <th colspan="2" class="weekend-head">
+            СБ
+          </th>
+        
+          <th colspan="2" class="weekend-head">
+            ВС
+          </th>
+        
+          <th colspan="2" class="">
+            ПН
+          </th>
+        
+          <th colspan="2" class="">
+            ВТ
+          </th>
+        
+          <th colspan="2" class="">
+            СР
+          </th>
+        
+          <th colspan="2" class="">
+            ЧТ
+          </th>
+        
+          <th colspan="2" class="">
+            ПТ
+          </th>
+        
+          <th colspan="2" class="weekend-head">
+            СБ
+          </th>
+        
+          <th colspan="2" class="weekend-head">
+            ВС
+          </th>
+        
+          <th colspan="2" class="">
+            ПН
+          </th>
+        
+          <th colspan="2" class="">
+            ВТ
+          </th>
+        
+          <th colspan="2" class="">
+            СР
+          </th>
+        
+          <th colspan="2" class="">
+            ЧТ
+          </th>
+        
+          <th colspan="2" class="">
+            ПТ
+          </th>
+        
+          <th colspan="2" class="weekend-head">
+            СБ
+          </th>
+        
+          <th colspan="2" class="weekend-head">
+            ВС
+          </th>
+        
+          <th colspan="2" class="">
+            ПН
+          </th>
+        
+          <th colspan="2" class="">
+            ВТ
+          </th>
+        
+          <th colspan="2" class="">
+            СР
+          </th>
+        
+          <th colspan="2" class="">
+            ЧТ
+          </th>
+        
+          <th colspan="2" class="">
+            ПТ
+          </th>
+        
+          <th colspan="2" class="weekend-head">
+            СБ
+          </th>
+        
+          <th colspan="2" class="weekend-head">
+            ВС
+          </th>
+        
+          <th colspan="2" class="">
+            ПН
+          </th>
+        
+            <th rowspan="2" class="summary-head">Всего часов</th>
+            <th rowspan="2" class="summary-head">Доп. часов</th>
+            <th rowspan="2" class="summary-head">Премия</th>
+            <th rowspan="2" class="summary-head">Итого к оплате</th>
+            <th rowspan="2" class="summary-head">Заработано всего</th>
+          </tr>
+          <tr>
+      
+          <th colspan="2" class="weekend-col">
+            1
+          </th>
+        
+          <th colspan="2" class="">
+            2
+          </th>
+        
+          <th colspan="2" class="">
+            3
+          </th>
+        
+          <th colspan="2" class="">
+            4
+          </th>
+        
+          <th colspan="2" class="">
+            5
+          </th>
+        
+          <th colspan="2" class="">
+            6
+          </th>
+        
+          <th colspan="2" class="weekend-col">
+            7
+          </th>
+        
+          <th colspan="2" class="weekend-col">
+            8
+          </th>
+        
+          <th colspan="2" class="">
+            9
+          </th>
+        
+          <th colspan="2" class="">
+            10
+          </th>
+        
+          <th colspan="2" class="">
+            11
+          </th>
+        
+          <th colspan="2" class="">
+            12
+          </th>
+        
+          <th colspan="2" class="">
+            13
+          </th>
+        
+          <th colspan="2" class="weekend-col">
+            14
+          </th>
+        
+          <th colspan="2" class="weekend-col">
+            15
+          </th>
+        
+          <th colspan="2" class="">
+            16
+          </th>
+        
+          <th colspan="2" class="">
+            17
+          </th>
+        
+          <th colspan="2" class="">
+            18
+          </th>
+        
+          <th colspan="2" class="">
+            19
+          </th>
+        
+          <th colspan="2" class="">
+            20
+          </th>
+        
+          <th colspan="2" class="weekend-col">
+            21
+          </th>
+        
+          <th colspan="2" class="weekend-col">
+            22
+          </th>
+        
+          <th colspan="2" class="">
+            23
+          </th>
+        
+          <th colspan="2" class="">
+            24
+          </th>
+        
+          <th colspan="2" class="">
+            25
+          </th>
+        
+          <th colspan="2" class="">
+            26
+          </th>
+        
+          <th colspan="2" class="">
+            27
+          </th>
+        
+          <th colspan="2" class="weekend-col">
+            28
+          </th>
+        
+          <th colspan="2" class="weekend-col">
+            29
+          </th>
+        
+          <th colspan="2" class="">
+            30
+          </th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <!-- ==============================================================
+         5. УПРАВЛЕНИЕ БРИГАДОЙ, СТАВКАМИ И ССЫЛКАМИ
+         ============================================================== -->
+    <div id="view-settings" class="view-container">
+      <div class="mobile-card" style="max-width: 900px; margin: 0 auto;">
+        <div class="card-title">
+          <span>⚙️ Управление ставками и ссылками бригады</span>
+        </div>
+
+        <!-- Форма добавления сотрудника с нуля -->
+        <div style="background: #0b1120; border: 1px solid #28354d; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #38bdf8;">+ Добавить сотрудника:</div>
+          <div style="display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 8px;">
+            <input type="text" id="newEmpName" class="custom-input" placeholder="Имя / Фамилия">
+            <input type="text" id="newEmpRole" class="custom-input" placeholder="Должность / Специальность">
+            <input type="number" id="newEmpRate" class="custom-input" placeholder="Ставка ₽/ч" value="500">
+            <button class="btn-small" style="background: var(--primary); padding: 0 16px;" onclick="addNewEmployee()">OK</button>
+          </div>
+        </div>
+
+        <table class="links-table">
+          <thead>
+            <tr>
+              <th>Сотрудник</th>
+              <th>Должность</th>
+              <th>Ставка (₽/час)</th>
+              <th>Персональная ссылка</th>
+              <th>Удалить</th>
+            </tr>
+          </thead>
+          <tbody id="linksTableBody"><tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Список пуст. Добавьте первого сотрудника через форму выше.</td></tr></tbody>
+        </table>
+
+        <!-- Ссылка бригадира -->
+        <div style="margin-top: 20px; padding: 14px; background: #0b1120; border-radius: 10px; border: 1px solid #28354d; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 700; font-size: 14px;">Ссылка для бригадира (Отметки с телефона):</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Без показа ставок и заработка сотрудников</div>
+          </div>
+          <button class="copy-link-btn" onclick="copyForemanLink()">📋 Скопировать ссылку</button>
+        </div>
+
+        <!-- Резервное копирование -->
+        <div style="margin-top: 14px; padding: 14px; background: #0b1120; border-radius: 10px; border: 1px solid #28354d; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <div style="font-weight: 700; font-size: 14px;">Резервная копия базы данных:</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Выгрузка и загрузка всех смен, чеков и документов в файл</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-small" onclick="exportDatabaseJson()">💾 Скачать базу (JSON)</button>
+            <input type="file" id="importJsonInput" accept=".json" style="display: none;" onchange="importDatabaseJson(event)">
+            <button class="btn-small" style="background: #475569;" onclick="document.getElementById('importJsonInput').click()">📂 Загрузить базу</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Модальное окно редактирования смены дня -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitle">Редактировать смену</div>
+
+      <div>
+        <label style="font-size: 12px; color: var(--text-muted);">Объект:</label>
+        <input type="text" id="modalObject" class="custom-input" style="width: 100%; margin-top: 4px;">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Приход:</label>
+          <input type="time" id="modalTimeStart" class="custom-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Уход:</label>
+          <input type="time" id="modalTimeEnd" class="custom-input" style="width: 100%; margin-top: 4px;">
+        </div>
+      </div>
+
+      <!-- Аудит времени -->
+      <div class="gps-info-box" id="modalActualAuditText" style="border-left: 4px solid #38bdf8;"></div>
+
+      <!-- GPS аудит -->
+      <div class="gps-info-box">
+        <div id="modalGpsStartText"></div>
+        <div id="modalGpsEndText"></div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <button class="action-btn btn-start" style="padding: 12px; font-size: 14px;" onclick="saveModalEdit()">Сохранить</button>
+        <button class="action-btn btn-stop" style="padding: 12px; font-size: 14px; background: #475569;" onclick="closeModal()">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно чека -->
+  <div class="modal-overlay" id="receiptModal">
+    <div class="modal-box">
+      <div class="modal-title">🧾 Добавить чек расхода</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">Объект:</label>
+          <select id="receiptObjectSelect" class="custom-select" style="width: 100%; margin-top: 4px;"></select>
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">Дата:</label>
+          <input type="date" id="receiptDateInput" class="custom-input" style="width: 100%; margin-top: 4px; padding: 7px;">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">Сумма (₽):</label>
+          <input type="number" id="receiptAmountInput" class="custom-input" placeholder="0" style="width: 100%; margin-top: 4px; font-size: 16px; font-weight: 700; color: #4ade80;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">Категория:</label>
+          <select id="receiptCategorySelect" class="custom-select" style="width: 100%; margin-top: 4px;">
+            <option value="ГСМ / Топливо">ГСМ / Топливо</option>
+            <option value="Расходники / Крепёж">Расходники / Крепёж</option>
+            <option value="Инструмент">Инструмент</option>
+            <option value="Питание">Питание</option>
+            <option value="Хознужды">Хознужды</option>
+            <option value="Прочее">Прочее</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size: 11px; color: var(--text-muted);">Кто оплатил / загрузил:</label>
+        <input type="text" id="receiptAuthorInput" class="custom-input" value="Бригадир" style="width: 100%; margin-top: 4px;">
+      </div>
+
+      <div>
+        <label style="font-size: 11px; color: var(--text-muted);">Комментарий:</label>
+        <input type="text" id="receiptNoteInput" class="custom-input" placeholder="Например: Бензин для генератора" style="width: 100%; margin-top: 4px;">
+      </div>
+
+      <div>
+        <input type="file" id="receiptFileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleReceiptFileSelected(event)">
+        <button class="btn-small" style="width: 100%; padding: 10px; background: #1e293b; border: 1.5px dashed #475569;" onclick="document.getElementById('receiptFileInput').click()">
+          📸 Сфотографировать чек
+        </button>
+        <div id="receiptPreviewBox" style="display: none; margin-top: 8px; text-align: center;">
+          <img id="receiptPreviewImg" src="" style="max-height: 120px; border-radius: 6px; border: 1px solid #475569;">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <button class="action-btn btn-start" style="padding: 12px; font-size: 14px;" onclick="saveReceiptEntry()">Сохранить чек</button>
+        <button class="action-btn btn-stop" style="padding: 12px; font-size: 14px; background: #475569;" onclick="closeReceiptModal()">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно паспорта / сертификата -->
+  <div class="modal-overlay" id="certModal">
+    <div class="modal-box">
+      <div class="modal-title">📋 Паспорт / Сертификат качества</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">Объект:</label>
+          <select id="certObjectSelect" class="custom-select" style="width: 100%; margin-top: 4px;"></select>
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">Дата:</label>
+          <input type="date" id="certDateInput" class="custom-input" style="width: 100%; margin-top: 4px; padding: 7px;">
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size: 11px; color: var(--text-muted);">Наименование материала / оборудования:</label>
+        <input type="text" id="certMaterialInput" class="custom-input" placeholder="Например: Кабель ВВГнг-LS 5х16" style="width: 100%; margin-top: 4px;">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">Тип документа:</label>
+          <select id="certDocTypeSelect" class="custom-select" style="width: 100%; margin-top: 4px;">
+            <option value="Паспорт качества">Паспорт качества</option>
+            <option value="Сертификат соответствия">Сертификат соответствия</option>
+            <option value="Протокол испытаний">Протокол испытаний</option>
+            <option value="Накладная">Накладная</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">№ партии / документа:</label>
+          <input type="text" id="certDocNumInput" class="custom-input" placeholder="№ 4128" style="width: 100%; margin-top: 4px;">
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size: 11px; color: var(--text-muted);">Завод-изготовитель / Поставщик:</label>
+        <input type="text" id="certSupplierInput" class="custom-input" placeholder="ООО Электрокабель" style="width: 100%; margin-top: 4px;">
+      </div>
+
+      <div>
+        <label style="font-size: 11px; color: var(--text-muted);">Кто принял:</label>
+        <input type="text" id="certAuthorInput" class="custom-input" value="Бригадир" style="width: 100%; margin-top: 4px;">
+      </div>
+
+      <div>
+        <label style="font-size: 11px; color: var(--text-muted);">Примечание:</label>
+        <input type="text" id="certNoteInput" class="custom-input" placeholder="Бухта 250м" style="width: 100%; margin-top: 4px;">
+      </div>
+
+      <div>
+        <input type="file" id="certFileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleCertFileSelected(event)">
+        <button class="btn-small" style="width: 100%; padding: 10px; background: #1e293b; border: 1.5px dashed #475569;" onclick="document.getElementById('certFileInput').click()">
+          📸 Сфотографировать паспорт / скан
+        </button>
+        <div id="certPreviewBox" style="display: none; margin-top: 8px; text-align: center;">
+          <img id="certPreviewImg" src="" style="max-height: 120px; border-radius: 6px; border: 1px solid #475569;">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <button class="action-btn btn-start" style="padding: 12px; font-size: 14px; background: #0284c7;" onclick="saveCertEntry()">Сохранить документ</button>
+        <button class="action-btn btn-stop" style="padding: 12px; font-size: 14px; background: #475569;" onclick="closeCertModal()">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно просмотра фото -->
+  <div class="modal-overlay" id="photoViewModal" onclick="closePhotoViewModal()">
+    <div style="max-width: 90vw; max-height: 90vh; text-align: center;">
+      <img id="photoViewImg" src="" style="max-width: 100%; max-height: 80vh; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+      <div id="photoViewCaption" style="margin-top: 8px; color: #fff; font-size: 13px; font-weight: 600;"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Действие выполнено</div>
+
+  <script>
+    /* ==============================================================
+       СОСТОЯНИЕ И ДАННЫЕ
+       ============================================================== */
+    const MONTH_NAMES = [
+      "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+      "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+    ];
+
+    const DAYS_RU = ["ВС", "ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"];
+
+    // Динамическая дата в реальном времени устройства
+    const initialRealDate = new Date();
+    let currentYear = initialRealDate.getFullYear();
+    let currentMonth = initialRealDate.getMonth(); // 0-11
+
+    let objectsList = [];
+    let selectedObject = "";
+
+    let employees = [];
+    let shiftsDb = {};
+    let receiptsDb = [];
+    let certsDb = [];
+
+    let checkedWorkerIds = new Set();
+    let currentForemanMode = "start";
+    let currentGpsCoords = null;
+    let currentTempShiftPhoto = "";
+    let currentTempReceiptPhoto = "";
+    let currentTempCertPhoto = "";
+
+    /* IndexedDB для сохранения фото */
+    let idb = null;
+    function initPhotoStorage() {
+      const req = indexedDB.open("TabelPhotosDB", 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("photos")) {
+          db.createObjectStore("photos", { keyPath: "id" });
+        }
+      };
+      req.onsuccess = (e) => { idb = e.target.result; };
+    }
+
+    function savePhotoToDb(id, base64) {
+      if (!idb) return;
+      const tx = idb.transaction("photos", "readwrite");
+      tx.objectStore("photos").put({ id, data: base64 });
+    }
+
+    function getPhotoFromDb(id) {
+      return new Promise((resolve) => {
+        if (!idb) return resolve(null);
+        const tx = idb.transaction("photos", "readonly");
+        const req = tx.objectStore("photos").get(id);
+        req.onsuccess = (e) => resolve(e.target.result ? e.target.result.data : null);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initPhotoStorage();
+      loadState();
+      checkUrlParams();
+      initGpsTracking();
+      updateRealTimeHeader();
+      renderForemanObjects();
+      renderForemanWorkers();
+      renderMatrixTable();
+      renderSettingsTable();
+      renderReceiptsRegistry();
+      renderCertsRegistry();
+
+      // Автоматическое обновление даты при смене суток
+      setInterval(updateRealTimeHeader, 60000);
+    });
+
+    // Функция обновления отображения текущей даты в реальном времени
+    function updateRealTimeHeader() {
+      const now = new Date();
+      const day = now.getDate();
+      const monthIdx = now.getMonth();
+      const year = now.getFullYear();
+      const dow = DAYS_RU[now.getDay()];
+
+      const label = document.getElementById("foremanCurrentDate");
+      if (label) {
+        label.innerText = `${day} ${MONTH_NAMES[monthIdx]} ${year} (${dow})`;
+      }
+
+      const sub = document.getElementById("headerSubtitle");
+      if (sub && !sub.innerText.includes("Режим") && !sub.innerText.includes("кабинет")) {
+        sub.innerText = `Сегодня: ${day} ${MONTH_NAMES[monthIdx]} ${year}`;
+      }
+    }
+
+    function checkUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get("role");
+      const workerId = params.get("worker");
+
+      if (role === "foreman") {
+        document.getElementById("btnTabMatrix").style.display = "none";
+        document.getElementById("btnTabSettings").style.display = "none";
+        document.getElementById("headerSubtitle").innerText = "Режим бригадира (Отметки смен)";
+        switchTab("foreman");
+      } else if (workerId) {
+        document.getElementById("navTabs").style.display = "none";
+        document.getElementById("headerSubtitle").innerText = "Личный кабинет сотрудника";
+        switchTab("matrix");
+        employees = employees.filter(e => e.id == workerId);
+      }
+    }
+
+    /* ==============================================================
+       СЛУЖБА GPS ГЕОЛОКАЦИИ
+       ============================================================== */
+    function initGpsTracking() {
+      if (!navigator.geolocation) return;
+
+      navigator.geolocation.watchPosition(
+        (pos) => {
+          currentGpsCoords = {
+            lat: Number(pos.coords.latitude.toFixed(6)),
+            lng: Number(pos.coords.longitude.toFixed(6)),
+            acc: Math.round(pos.coords.accuracy)
+          };
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      );
+    }
+
+    async function captureGps() {
+      if (!navigator.geolocation) return currentGpsCoords;
+      return new Promise((resolve) => {
+        let finished = false;
+        // Таймаут безопасности 3 секунды: если GPS не определился, не зависаем и не блокируем бригадира
+        const timer = setTimeout(() => {
+          if (!finished) {
+            finished = true;
+            resolve(currentGpsCoords || null);
+          }
+        }, 3000);
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            if (!finished) {
+              finished = true;
+              clearTimeout(timer);
+              const c = {
+                lat: Number(pos.coords.latitude.toFixed(6)),
+                lng: Number(pos.coords.longitude.toFixed(6)),
+                acc: Math.round(pos.coords.accuracy)
+              };
+              currentGpsCoords = c;
+              resolve(c);
+            }
+          },
+          () => {
+            if (!finished) {
+              finished = true;
+              clearTimeout(timer);
+              resolve(currentGpsCoords || null);
+            }
+          },
+          { enableHighAccuracy: false, timeout: 2800, maximumAge: 30000 }
+        );
+      });
+    }
+
+    /* ==============================================================
+       КАЛЕНДАРЬ
+       ============================================================== */
+    function getDaysInMonth(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      } else if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      saveState();
+      renderMatrixTable();
+    }
+
+    /* ==============================================================
+       ИНТЕРФЕЙС БРИГАДИРА
+       ============================================================== */
+    function setShiftMode(mode) {
+      currentForemanMode = mode;
+      vibratePhone(25);
+
+      document.getElementById("modeBtnStart").className = "mode-btn" + (mode === "start" ? " active-start" : "");
+      document.getElementById("modeBtnStop").className = "mode-btn" + (mode === "stop" ? " active-stop" : "");
+      document.getElementById("modeBtnManual").className = "mode-btn" + (mode === "manual" ? " active-manual" : "");
+
+      document.getElementById("objectSelectBlock").style.display = (mode === "stop") ? "none" : "block";
+      document.getElementById("manualTimeBlock").style.display = (mode === "manual") ? "block" : "none";
+      document.getElementById("shiftPhotoCard").style.display = (mode === "stop") ? "block" : "none";
+
+      const declaredBlock = document.getElementById("shiftDeclaredTimeBlock");
+      const declaredLabel = document.getElementById("declaredTimeLabel");
+      const declaredInput = document.getElementById("declaredTimeInput");
+
+      const now = new Date();
+      const currentHhMm = now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+      if (mode === "start") {
+        declaredBlock.style.display = "block";
+        declaredLabel.innerText = "🕒 Время начала работы на объекте:";
+        if (!declaredInput.value) declaredInput.value = currentHhMm;
+      } else if (mode === "stop") {
+        declaredBlock.style.display = "block";
+        declaredLabel.innerText = "🕒 Время окончания смены:";
+        declaredInput.value = currentHhMm;
+      } else {
+        declaredBlock.style.display = "none";
+      }
+
+      const actionBtn = document.getElementById("mainActionBtn");
+      if (mode === "start") {
+        actionBtn.className = "action-btn btn-start";
+        actionBtn.innerHTML = "<span>☀️ СТАРТ СМЕНЫ</span>";
+      } else if (mode === "stop") {
+        actionBtn.className = "action-btn btn-stop";
+        actionBtn.innerHTML = "<span>🌙 ФИНИШ СМЕНЫ + 📷 ФОТО</span>";
+      } else {
+        actionBtn.className = "action-btn btn-save-manual";
+        actionBtn.innerHTML = "<span>💾 ЗАПИСАТЬ В ТАБЕЛЬ</span>";
+      }
+
+      renderForemanWorkers();
+    }
+
+    function setDeclaredTimeToCurrent() {
+      const now = new Date();
+      document.getElementById("declaredTimeInput").value = now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+      vibratePhone(15);
+    }
+
+    function handleShiftPhotoSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentTempShiftPhoto = e.target.result;
+        document.getElementById("shiftPhotoPreviewImg").src = currentTempShiftPhoto;
+        document.getElementById("shiftPhotoPreviewBox").style.display = "block";
+        showToast("Фото смены прикреплено");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderForemanObjects() {
+      const container = document.getElementById("objectsPillList");
+      if (objectsList.length === 0) {
+        container.innerHTML = `
+          <div style="font-size: 12px; color: #64748b; padding: 4px 0;">
+            Объекты не добавлены. Введите название ниже и нажмите OK.
+          </div>
+        `;
+        return;
+      }
+      container.innerHTML = objectsList.map(obj => `
+        <div class="object-pill ${obj === selectedObject ? 'selected' : ''}" onclick="selectObject('${obj}')">
+          ${obj}
+        </div>
+      `).join("");
+    }
+
+    function selectObject(obj) {
+      selectedObject = obj;
+      vibratePhone(15);
+      renderForemanObjects();
+    }
+
+    function addNewObject() {
+      const input = document.getElementById("customObjectInput");
+      const val = input.value.trim();
+      if (val && !objectsList.includes(val)) {
+        objectsList.push(val);
+        selectedObject = val;
+        input.value = "";
+        saveState();
+        renderForemanObjects();
+        showToast(`Объект "${val}" добавлен`);
+      }
+    }
+
+    function renderForemanWorkers() {
+      const container = document.getElementById("workersListMobile");
+      const today = new Date().getDate(); // Текущий реальный день месяца
+
+      if (employees.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px;">
+            Работники пока не добавлены.<br>Перейдите во вкладку «🔑 Ставки & Ссылки», чтобы внести бригаду.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = employees.map(emp => {
+        const key = `${currentYear}-${currentMonth}-${today}_${emp.id}`;
+        const shift = shiftsDb[key];
+        const isOnShift = shift && shift.start && !shift.end;
+        const isChecked = checkedWorkerIds.has(emp.id);
+
+        return `
+          <div class="worker-card ${isChecked ? 'checked' : ''} ${isOnShift ? 'on-shift' : ''}" onclick="toggleWorkerCheck(${emp.id})">
+            <div class="worker-info-main">
+              <div class="worker-name">
+                ${emp.name}
+                <span class="worker-id-badge">ID ${emp.id}</span>
+              </div>
+              <div class="worker-role">${emp.role}</div>
+              ${isOnShift ? `<div class="worker-shift-tag">🟢 На смене с ${shift.start} (${shift.object})</div>` : ''}
+              ${shift && shift.end ? `<div style="font-size: 11px; color: #94a3b8;">🏁 Отработано: ${shift.total} ч</div>` : ''}
+            </div>
+            <div class="custom-checkbox">
+              ${isChecked ? '✓' : ''}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function toggleWorkerCheck(id) {
+      vibratePhone(15);
+      if (checkedWorkerIds.has(id)) {
+        checkedWorkerIds.delete(id);
+      } else {
+        checkedWorkerIds.add(id);
+      }
+      renderForemanWorkers();
+    }
+
+    function toggleSelectAll() {
+      vibratePhone(25);
+      if (checkedWorkerIds.size === employees.length) {
+        checkedWorkerIds.clear();
+      } else {
+        employees.forEach(e => checkedWorkerIds.add(e.id));
+      }
+      renderForemanWorkers();
+    }
+
+    async function executeShiftAction() {
+      if (checkedWorkerIds.size === 0) {
+        showToast("⚠️ Выберите сотрудников галочкой");
+        return;
+      }
+
+      if (currentForemanMode !== "stop" && !selectedObject) {
+        showToast("⚠️ Сначала добавьте или выберите объект!");
+        return;
+      }
+
+      vibratePhone(40);
+
+      // Пытаемся получить GPS в фоне (но никогда не блокируем процесс, если нет связи)
+      let gps = null;
+      try {
+        gps = await captureGps();
+      } catch (err) {
+        gps = null;
+      }
+
+      // Определяем фактический день и реальное время нажатия кнопки
+      const now = new Date();
+      const today = now.getDate();
+      const actualTimeStr = now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+      // Заявленное пользователем время начала или окончания
+      let declaredTime = document.getElementById("declaredTimeInput").value || actualTimeStr;
+
+      if (currentForemanMode === "start") {
+        // Сравнение заявленного времени со временем нажатия кнопки
+        const [dH, dM] = declaredTime.split(":").map(Number);
+        const [aH, aM] = actualTimeStr.split(":").map(Number);
+        const declaredMinutes = dH * 60 + dM;
+        const actualMinutes = aH * 60 + aM;
+        const diffMinutes = actualMinutes - declaredMinutes;
+
+        let delayText = "";
+        let isDelayed = false;
+
+        if (diffMinutes > 15) {
+          isDelayed = true;
+          const h = Math.floor(diffMinutes / 60);
+          const m = diffMinutes % 60;
+          delayText = `Задержка отписки: ${h > 0 ? h + 'ч ' : ''}${m}мин`;
+        } else if (diffMinutes < -15) {
+          const adv = Math.abs(diffMinutes);
+          const h = Math.floor(adv / 60);
+          const m = adv % 60;
+          delayText = `Отметка заранее на: ${h > 0 ? h + 'ч ' : ''}${m}мин`;
+        } else {
+          delayText = "Отметка вовремя";
+        }
+
+        checkedWorkerIds.forEach(id => {
+          const key = `${currentYear}-${currentMonth}-${today}_${id}`;
+
+          shiftsDb[key] = {
+            object: selectedObject,
+            start: declaredTime, // В табель идет заявленное рабочее время
+            end: "",
+            actualPressStart: actualTimeStr, // Реальное время нажатия кнопки
+            declaredStart: declaredTime,     // Заявленное время
+            startDelayDiffMin: diffMinutes,
+            startDelayText: delayText,
+            isStartDelayed: isDelayed,
+            actualPressEnd: "",
+            declaredEnd: "",
+            endDelayText: "",
+            isEndDelayed: false,
+            total: 0,
+            overtime: 0,
+            gpsStart: gps ? { ...gps } : null,
+            gpsEnd: null,
+            photoId: null
+          };
+        });
+
+        const gpsNote = gps ? "" : " (без GPS)";
+        const delayNotice = isDelayed ? ` [⚠️ ${delayText}]` : "";
+        showToast(`☀️ СТАРТ: ${declaredTime} (нажато в ${actualTimeStr})${gpsNote}${delayNotice}`);
+      } 
+      else if (currentForemanMode === "stop") {
+        let photoKey = null;
+        if (currentTempShiftPhoto) {
+          photoKey = `shift_photo_${Date.now()}`;
+          savePhotoToDb(photoKey, currentTempShiftPhoto);
+        }
+
+        // Сравнение для финиша
+        const [dH, dM] = declaredTime.split(":").map(Number);
+        const [aH, aM] = actualTimeStr.split(":").map(Number);
+        const declaredMinutes = dH * 60 + dM;
+        const actualMinutes = aH * 60 + aM;
+        const diffMinutes = actualMinutes - declaredMinutes;
+
+        let delayText = "";
+        let isDelayed = false;
+
+        if (diffMinutes > 15) {
+          isDelayed = true;
+          const h = Math.floor(diffMinutes / 60);
+          const m = diffMinutes % 60;
+          delayText = `Задержка закрытия: ${h > 0 ? h + 'ч ' : ''}${m}мин`;
+        } else if (diffMinutes < -15) {
+          const adv = Math.abs(diffMinutes);
+          const h = Math.floor(adv / 60);
+          const m = adv % 60;
+          delayText = `Закрыто заранее на: ${h > 0 ? h + 'ч ' : ''}${m}мин`;
+        } else {
+          delayText = "Закрыто вовремя";
+        }
+
+        checkedWorkerIds.forEach(id => {
+          const key = `${currentYear}-${currentMonth}-${today}_${id}`;
+          let shift = shiftsDb[key];
+          
+          if (!shift || !shift.start) {
+            shift = {
+              object: selectedObject || "Объект",
+              start: "08:00",
+              end: declaredTime,
+              actualPressStart: "нет данных",
+              declaredStart: "08:00",
+              startDelayDiffMin: 0,
+              startDelayText: "Утром отметка не нажималась",
+              isStartDelayed: true,
+              actualPressEnd: actualTimeStr,
+              declaredEnd: declaredTime,
+              endDelayText: delayText,
+              isEndDelayed: isDelayed,
+              total: 0,
+              overtime: 0,
+              gpsStart: null,
+              gpsEnd: gps ? { ...gps } : null,
+              photoId: photoKey
+            };
+            shiftsDb[key] = shift;
+          } else {
+            shift.end = declaredTime;
+            shift.actualPressEnd = actualTimeStr;
+            shift.declaredEnd = declaredTime;
+            shift.endDelayText = delayText;
+            shift.isEndDelayed = isDelayed;
+            shift.gpsEnd = gps ? { ...gps } : null;
+            if (photoKey) shift.photoId = photoKey;
+          }
+
+          calculateShiftHours(shift);
+        });
+
+        currentTempShiftPhoto = "";
+        document.getElementById("shiftPhotoPreviewBox").style.display = "none";
+        document.getElementById("shiftPhotoPreviewImg").src = "";
+        
+        const gpsNote = gps ? "" : " (без GPS)";
+        showToast(`🌙 ФИНИШ: ${declaredTime} (нажато в ${actualTimeStr})${gpsNote}`);
+      } 
+      else if (currentForemanMode === "manual") {
+        const day = parseInt(document.getElementById("manualDay").value);
+        const start = document.getElementById("manualTimeStart").value;
+        const end = document.getElementById("manualTimeEnd").value;
+
+        checkedWorkerIds.forEach(id => {
+          const key = `${currentYear}-${currentMonth}-${day}_${id}`;
+          shiftsDb[key] = {
+            object: selectedObject,
+            start: start,
+            end: end,
+            actualPressStart: `Вручную (${actualTimeStr})`,
+            declaredStart: start,
+            startDelayDiffMin: 0,
+            startDelayText: "Внесено вручную",
+            isStartDelayed: false,
+            actualPressEnd: `Вручную (${actualTimeStr})`,
+            declaredEnd: end,
+            endDelayText: "Внесено вручную",
+            isEndDelayed: false,
+            total: 0,
+            overtime: 0,
+            gpsStart: null,
+            gpsEnd: null,
+            photoId: null
+          };
+          calculateShiftHours(shiftsDb[key]);
+        });
+        showToast(`💾 Данные сохранены за ${day}-е число`);
+      }
+
+      checkedWorkerIds.clear();
+      saveState();
+      renderForemanWorkers();
+      renderMatrixTable();
+    }
+
+    function calculateShiftHours(shift) {
+      if (!shift.start || !shift.end) return;
+
+      const [sH, sM] = shift.start.split(":").map(Number);
+      const [eH, eM] = shift.end.split(":").map(Number);
+
+      let startMin = sH * 60 + sM;
+      let endMin = eH * 60 + eM;
+      if (endMin < startMin) endMin += 24 * 60; // Переход через полночь
+
+      const totalH = Math.round(((endMin - startMin) / 60) * 10) / 10;
+      const overtimeH = totalH > 9.0 ? Math.round((totalH - 9.0) * 10) / 10 : 0.0;
+
+      shift.total = totalH;
+      shift.overtime = overtimeH;
+    }
+
+    /* ==============================================================
+       МОДУЛЬ ЧЕКОВ И РАСХОДОВ
+       ============================================================== */
+    function openReceiptModal() {
+      const select = document.getElementById("receiptObjectSelect");
+      select.innerHTML = objectsList.map(o => `<option value="${o}">${o}</option>`).join("");
+      document.getElementById("receiptDateInput").value = new Date().toISOString().split("T")[0];
+      document.getElementById("receiptAmountInput").value = "";
+      document.getElementById("receiptNoteInput").value = "";
+      currentTempReceiptPhoto = "";
+      document.getElementById("receiptPreviewBox").style.display = "none";
+      document.getElementById("receiptPreviewImg").src = "";
+      document.getElementById("receiptModal").classList.add("open");
+    }
+
+    function closeReceiptModal() {
+      document.getElementById("receiptModal").classList.remove("open");
+    }
+
+    function handleReceiptFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentTempReceiptPhoto = e.target.result;
+        document.getElementById("receiptPreviewImg").src = currentTempReceiptPhoto;
+        document.getElementById("receiptPreviewBox").style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveReceiptEntry() {
+      const amount = parseFloat(document.getElementById("receiptAmountInput").value);
+      if (isNaN(amount) || amount <= 0) {
+        showToast("⚠️ Укажите корректную сумму расхода");
+        return;
+      }
+
+      const receiptId = `receipt_${Date.now()}`;
+      let photoKey = null;
+
+      if (currentTempReceiptPhoto) {
+        photoKey = `photo_${receiptId}`;
+        savePhotoToDb(photoKey, currentTempReceiptPhoto);
+      }
+
+      const entry = {
+        id: receiptId,
+        date: document.getElementById("receiptDateInput").value || new Date().toISOString().split("T")[0],
+        object: document.getElementById("receiptObjectSelect").value,
+        category: document.getElementById("receiptCategorySelect").value,
+        amount: amount,
+        author: document.getElementById("receiptAuthorInput").value.trim() || "Бригадир",
+        note: document.getElementById("receiptNoteInput").value.trim() || "-",
+        photoId: photoKey
+      };
+
+      receiptsDb.unshift(entry);
+      saveState();
+      closeReceiptModal();
+      renderReceiptsRegistry();
+      showToast("🧾 Чек успешно сохранен в базе");
+    }
+
+    async function renderReceiptsRegistry() {
+      const tbody = document.getElementById("receiptsTableBody");
+      const objFilter = document.getElementById("receiptFilterObject").value;
+      const catFilter = document.getElementById("receiptFilterCategory").value;
+
+      // Обновляем фильтр объектов
+      const objSelect = document.getElementById("receiptFilterObject");
+      const currentSelected = objSelect.value;
+      objSelect.innerHTML = `<option value="all">Все объекты</option>` + objectsList.map(o => `<option value="${o}" ${o === currentSelected ? 'selected' : ''}>${o}</option>`).join("");
+
+      let filtered = receiptsDb.filter(r => {
+        if (objFilter !== "all" && r.object !== objFilter) return false;
+        if (catFilter !== "all" && r.category !== catFilter) return false;
+        return true;
+      });
+
+      let totalSum = filtered.reduce((acc, r) => acc + (r.amount || 0), 0);
+      document.getElementById("receiptTotalSum").innerText = `${totalSum.toLocaleString()} ₽`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="padding: 24px; color: var(--text-muted); text-align: center;">Чеки пока не добавлены</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      for (let r of filtered) {
+        let photoThumb = `<span style="color: #64748b;">Без фото</span>`;
+        if (r.photoId) {
+          const photoData = await getPhotoFromDb(r.photoId);
+          if (photoData) {
+            photoThumb = `<img src="${photoData}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #475569;" onclick="viewPhotoFullScreen('${r.photoId}', 'Чек: ${r.object} — ${r.amount} ₽')">`;
+          }
+        }
+
+        html += `
+          <tr>
+            <td style="font-family: var(--font-mono);">${r.date}</td>
+            <td style="font-weight: 700; color: #fde047;">${r.object}</td>
+            <td style="color: #38bdf8;">${r.category}</td>
+            <td style="font-weight: 800; color: #4ade80;">${r.amount.toLocaleString()} ₽</td>
+            <td>${r.author}</td>
+            <td style="color: var(--text-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.note}</td>
+            <td>${photoThumb}</td>
+            <td>
+              <button class="btn-small" style="background: #dc2626; padding: 4px 8px;" onclick="deleteReceipt('${r.id}')">✕</button>
+            </td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = html;
+    }
+
+    function deleteReceipt(id) {
+      if (confirm("Удалить этот чек из реестра?")) {
+        receiptsDb = receiptsDb.filter(r => r.id !== id);
+        saveState();
+        renderReceiptsRegistry();
+        showToast("Чек удален");
+      }
+    }
+
+    async function viewPhotoFullScreen(photoId, caption) {
+      const data = await getPhotoFromDb(photoId);
+      if (data) {
+        document.getElementById("photoViewImg").src = data;
+        document.getElementById("photoViewCaption").innerText = caption || "Нажмите в любое место, чтобы закрыть";
+        document.getElementById("photoViewModal").classList.add("open");
+      }
+    }
+
+    function closePhotoViewModal() {
+      document.getElementById("photoViewModal").classList.remove("open");
+    }
+
+    function exportReceiptsToCsv() {
+      if (receiptsDb.length === 0) {
+        showToast("Нет чеков для выгрузки");
+        return;
+      }
+
+      let csv = "\uFEFF";
+      csv += "ID;Дата;Объект;Категория;Сумма_Руб;Кто_Загрузил;Комментарий;Наличие_Фото\n";
+
+      receiptsDb.forEach(r => {
+        csv += `${r.id};${r.date};${r.object};${r.category};${r.amount};${r.author};"${r.note.replace(/"/g, '""')}";${r.photoId ? 'Да' : 'Нет'}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Реестр_Чеков_${currentYear}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Реестр чеков выгружен в CSV");
+    }
+
+    /* ==============================================================
+       МОДУЛЬ ПАСПОРТОВ И СЕРТИФИКАТОВ НА МАТЕРИАЛЫ
+       ============================================================== */
+    function openCertModal() {
+      const select = document.getElementById("certObjectSelect");
+      select.innerHTML = objectsList.map(o => `<option value="${o}">${o}</option>`).join("");
+      document.getElementById("certDateInput").value = new Date().toISOString().split("T")[0];
+      document.getElementById("certMaterialInput").value = "";
+      document.getElementById("certDocNumInput").value = "";
+      document.getElementById("certSupplierInput").value = "";
+      document.getElementById("certNoteInput").value = "";
+      currentTempCertPhoto = "";
+      document.getElementById("certPreviewBox").style.display = "none";
+      document.getElementById("certPreviewImg").src = "";
+      document.getElementById("certModal").classList.add("open");
+    }
+
+    function closeCertModal() {
+      document.getElementById("certModal").classList.remove("open");
+    }
+
+    function handleCertFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentTempCertPhoto = e.target.result;
+        document.getElementById("certPreviewImg").src = currentTempCertPhoto;
+        document.getElementById("certPreviewBox").style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveCertEntry() {
+      const material = document.getElementById("certMaterialInput").value.trim();
+      if (!material) {
+        showToast("⚠️ Укажите наименование материала");
+        return;
+      }
+
+      const certId = `cert_${Date.now()}`;
+      let photoKey = null;
+
+      if (currentTempCertPhoto) {
+        photoKey = `photo_${certId}`;
+        savePhotoToDb(photoKey, currentTempCertPhoto);
+      }
+
+      const entry = {
+        id: certId,
+        date: document.getElementById("certDateInput").value || new Date().toISOString().split("T")[0],
+        object: document.getElementById("certObjectSelect").value,
+        material: material,
+        docType: document.getElementById("certDocTypeSelect").value,
+        docNum: document.getElementById("certDocNumInput").value.trim() || "-",
+        supplier: document.getElementById("certSupplierInput").value.trim() || "-",
+        author: document.getElementById("certAuthorInput").value.trim() || "Бригадир",
+        note: document.getElementById("certNoteInput").value.trim() || "-",
+        photoId: photoKey
+      };
+
+      certsDb.unshift(entry);
+      saveState();
+      closeCertModal();
+      renderCertsRegistry();
+      showToast("📋 Документ на материал сохранен");
+    }
+
+    async function renderCertsRegistry() {
+      const tbody = document.getElementById("certsTableBody");
+      const objFilter = document.getElementById("certFilterObject").value;
+      const query = (document.getElementById("certSearchInput").value || "").toLowerCase().trim();
+
+      // Обновляем список объектов в фильтре
+      const objSelect = document.getElementById("certFilterObject");
+      const currentSelected = objSelect.value;
+      objSelect.innerHTML = `<option value="all">Все объекты</option>` + objectsList.map(o => `<option value="${o}" ${o === currentSelected ? 'selected' : ''}>${o}</option>`).join("");
+
+      let filtered = certsDb.filter(c => {
+        if (objFilter !== "all" && c.object !== objFilter) return false;
+        if (query) {
+          const matchMaterial = c.material && c.material.toLowerCase().includes(query);
+          const matchNum = c.docNum && c.docNum.toLowerCase().includes(query);
+          const matchSupplier = c.supplier && c.supplier.toLowerCase().includes(query);
+          if (!matchMaterial && !matchNum && !matchSupplier) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="padding: 24px; color: var(--text-muted); text-align: center;">Паспорта и сертификаты пока не добавлены</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      for (let c of filtered) {
+        let photoThumb = `<span style="color: #64748b;">Без фото</span>`;
+        if (c.photoId) {
+          const photoData = await getPhotoFromDb(c.photoId);
+          if (photoData) {
+            photoThumb = `<img src="${photoData}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #475569;" onclick="viewPhotoFullScreen('${c.photoId}', '${c.material}: ${c.docType} (${c.object})')">`;
+          }
+        }
+
+        html += `
+          <tr>
+            <td style="font-family: var(--font-mono);">${c.date}</td>
+            <td style="font-weight: 700; color: #fde047;">${c.object}</td>
+            <td style="font-weight: 700; color: #38bdf8;">${c.material}</td>
+            <td><span style="background:#1e293b; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${c.docType}</span> <br><small style="color:#94a3b8;">${c.docNum}</small></td>
+            <td>${c.supplier}</td>
+            <td>${c.author}</td>
+            <td style="color: var(--text-muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis;">${c.note}</td>
+            <td>${photoThumb}</td>
+            <td>
+              <button class="btn-small" style="background: #dc2626; padding: 4px 8px;" onclick="deleteCert('${c.id}')">✕</button>
+            </td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = html;
+    }
+
+    function deleteCert(id) {
+      if (confirm("Удалить этот сертификат/паспорт из реестра?")) {
+        certsDb = certsDb.filter(c => c.id !== id);
+        saveState();
+        renderCertsRegistry();
+        showToast("Документ удален");
+      }
+    }
+
+    function exportCertsToCsv() {
+      if (certsDb.length === 0) {
+        showToast("Нет документов для выгрузки");
+        return;
+      }
+
+      let csv = "\uFEFF";
+      csv += "ID;Дата;Объект;Материал;Тип_Документа;Номер_Партии;Поставщик;Кто_Внес;Примечание;Наличие_Фото\n";
+
+      certsDb.forEach(c => {
+        csv += `${c.id};${c.date};${c.object};"${c.material.replace(/"/g, '""')}";${c.docType};"${c.docNum}";"${c.supplier.replace(/"/g, '""')}";${c.author};"${c.note.replace(/"/g, '""')}";${c.photoId ? 'Да' : 'Нет'}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Реестр_Сертификатов_и_Паспортов_${currentYear}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Реестр сертификатов выгружен в CSV");
+    }
+
+    /* ==============================================================
+       ОТРИСОВКА ШАХМАТКИ ТАБЕЛЯ
+       ============================================================== */
+    function renderMatrixTable() {
+      const table = document.getElementById("mainMatrixTable");
+      const daysCount = getDaysInMonth(currentYear, currentMonth);
+
+      document.getElementById("calMonthTitle").innerText = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+
+      const period = document.getElementById("periodFilterSelect").value;
+      let startDay = 1;
+      let endDay = daysCount;
+
+      if (period === "w1") { startDay = 1; endDay = Math.min(7, daysCount); }
+      if (period === "w2") { startDay = 8; endDay = Math.min(14, daysCount); }
+      if (period === "w3") { startDay = 15; endDay = Math.min(21, daysCount); }
+      if (period === "w4") { startDay = 22; endDay = Math.min(28, daysCount); }
+      if (period === "w5") { startDay = 29; endDay = daysCount; }
+
+      let theadHtml = `
+        <thead>
+          <tr>
+            <th rowspan="2" class="sticky-col-1">Сотрудник</th>
+            <th rowspan="2" class="sticky-col-2">Должность</th>
+            <th rowspan="2" class="sticky-col-3">Параметр</th>
+      `;
+
+      for (let d = startDay; d <= endDay; d++) {
+        const dayOfWeek = new Date(currentYear, currentMonth, d).getDay();
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+        theadHtml += `
+          <th colspan="2" class="${isWeekend ? 'weekend-head' : ''}">
+            ${DAYS_RU[dayOfWeek]}
+          </th>
+        `;
+      }
+
+      theadHtml += `
+            <th rowspan="2" class="summary-head">Всего часов</th>
+            <th rowspan="2" class="summary-head">Доп. часов</th>
+            <th rowspan="2" class="summary-head">Премия</th>
+            <th rowspan="2" class="summary-head">Итого к оплате</th>
+            <th rowspan="2" class="summary-head">Заработано всего</th>
+          </tr>
+          <tr>
+      `;
+
+      for (let d = startDay; d <= endDay; d++) {
+        const dayOfWeek = new Date(currentYear, currentMonth, d).getDay();
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+        theadHtml += `
+          <th colspan="2" class="${isWeekend ? 'weekend-col' : ''}">
+            ${d}
+          </th>
+        `;
+      }
+
+      theadHtml += `</tr></thead>`;
+
+      let tbodyHtml = `<tbody>`;
+
+      employees.forEach(emp => {
+        let sumTotalHours = 0;
+        let sumOvertimeHours = 0;
+        let sumEarned = 0;
+
+        for (let d = 1; d <= daysCount; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          if (shift) {
+            sumTotalHours += (shift.total || 0);
+            sumOvertimeHours += (shift.overtime || 0);
+            sumEarned += Math.round((shift.total || 0) * emp.rate);
+          }
+        }
+
+        const totalPayable = sumEarned + (emp.premium || 0);
+
+        // Строка 1: Объект
+        tbodyHtml += `<tr class="row-object">
+          <td rowspan="6" class="sticky-col-1" style="vertical-align: middle;">${emp.name}</td>
+          <td rowspan="6" class="sticky-col-2" style="vertical-align: middle;">${emp.role}</td>
+          <td class="sticky-col-3">Объект</td>
+        `;
+        for (let d = startDay; d <= endDay; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          const isWeekend = isDayWeekend(d);
+          const gpsIcon = (shift && (shift.gpsStart || shift.gpsEnd)) ? ' 📍' : '';
+          const alertIcon = (shift && (shift.isStartDelayed || shift.isEndDelayed)) ? ' ⚠️' : '';
+          tbodyHtml += `<td colspan="2" class="editable-day ${isWeekend ? 'weekend-col' : ''}" onclick="openEditModal(${emp.id}, ${d})">${shift ? shift.object + gpsIcon + alertIcon : ''}</td>`;
+        }
+        tbodyHtml += `
+          <td rowspan="6" class="summary-cell" style="vertical-align: middle;">${sumTotalHours.toFixed(1)}</td>
+          <td rowspan="6" class="summary-cell" style="vertical-align: middle; color: #f87171;">${sumOvertimeHours.toFixed(1)}</td>
+          <td rowspan="6" class="summary-cell" style="vertical-align: middle;">
+            <input type="number" value="${emp.premium}" class="rate-input" style="width: 70px;" onchange="updatePremium(${emp.id}, this.value)">
+          </td>
+          <td rowspan="6" class="summary-cell" style="vertical-align: middle; color: #4ade80;">${totalPayable.toLocaleString()} ₽</td>
+          <td rowspan="6" class="summary-cell" style="vertical-align: middle; color: #38bdf8;">${sumEarned.toLocaleString()} ₽</td>
+        </tr>`;
+
+        // Строка 2: Время
+        tbodyHtml += `<tr class="row-time"><td class="sticky-col-3">Время</td>`;
+        for (let d = startDay; d <= endDay; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          const isWeekend = isDayWeekend(d);
+          tbodyHtml += `
+            <td class="editable-day ${isWeekend ? 'weekend-col' : ''}" onclick="openEditModal(${emp.id}, ${d})">${shift ? shift.start : ''}</td>
+            <td class="editable-day ${isWeekend ? 'weekend-col' : ''}" onclick="openEditModal(${emp.id}, ${d})">${shift ? shift.end : ''}</td>
+          `;
+        }
+        tbodyHtml += `</tr>`;
+
+        // Строка 3: Общее
+        tbodyHtml += `<tr class="row-total"><td class="sticky-col-3">Общее</td>`;
+        for (let d = startDay; d <= endDay; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          const isWeekend = isDayWeekend(d);
+          tbodyHtml += `<td colspan="2" class="${isWeekend ? 'weekend-col' : ''}">${shift && shift.total ? shift.total.toFixed(1) : '0,0'}</td>`;
+        }
+        tbodyHtml += `</tr>`;
+
+        // Строка 4: Дополнительные
+        tbodyHtml += `<tr class="row-overtime"><td class="sticky-col-3">Дополнительные</td>`;
+        for (let d = startDay; d <= endDay; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          const isWeekend = isDayWeekend(d);
+          tbodyHtml += `<td colspan="2" class="${isWeekend ? 'weekend-col' : ''}">${shift && shift.overtime ? shift.overtime.toFixed(1) : '0,0'}</td>`;
+        }
+        tbodyHtml += `</tr>`;
+
+        // Строка 5: Заработал
+        tbodyHtml += `<tr class="row-earned"><td class="sticky-col-3">Заработал</td>`;
+        for (let d = startDay; d <= endDay; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          const isWeekend = isDayWeekend(d);
+          const earned = shift && shift.total ? Math.round(shift.total * emp.rate) : 0;
+          tbodyHtml += `<td colspan="2" class="${isWeekend ? 'weekend-col' : ''}">${earned > 0 ? earned + ' ₽' : '0 ₽'}</td>`;
+        }
+        tbodyHtml += `</tr>`;
+
+        // Строка 6: Оплачено
+        tbodyHtml += `<tr style="color: #94a3b8;"><td class="sticky-col-3">Оплачено</td>`;
+        for (let d = startDay; d <= endDay; d++) {
+          const isWeekend = isDayWeekend(d);
+          tbodyHtml += `<td colspan="2" class="${isWeekend ? 'weekend-col' : ''}">0 ₽</td>`;
+        }
+        tbodyHtml += `</tr>`;
+      });
+
+      tbodyHtml += `</tbody>`;
+      table.innerHTML = theadHtml + tbodyHtml;
+    }
+
+    function isDayWeekend(day) {
+      const dow = new Date(currentYear, currentMonth, day).getDay();
+      return dow === 0 || dow === 6;
+    }
+
+    function updatePremium(empId, val) {
+      const emp = employees.find(e => e.id === empId);
+      if (emp) {
+        emp.premium = parseFloat(val) || 0;
+        saveState();
+        renderMatrixTable();
+      }
+    }
+
+    /* ==============================================================
+       МОДАЛЬНОЕ ОКНО ДНЯ СО ССЫЛКАМИ НА КАРТЫ
+       ============================================================== */
+    let editingEmpId = null;
+    let editingDay = null;
+
+    function openEditModal(empId, day) {
+      editingEmpId = empId;
+      editingDay = day;
+
+      const emp = employees.find(e => e.id === empId);
+      const key = `${currentYear}-${currentMonth}-${day}_${empId}`;
+      const shift = shiftsDb[key] || { object: "Маркса", start: "08:00", end: "18:30" };
+
+      document.getElementById("modalTitle").innerText = `${emp.name} — ${day} ${MONTH_NAMES[currentMonth]}`;
+      document.getElementById("modalObject").value = shift.object || "";
+      document.getElementById("modalTimeStart").value = shift.start || "";
+      document.getElementById("modalTimeEnd").value = shift.end || "";
+
+      // Формирование кликабельных ссылок на Яндекс и Google Карты
+      const startBox = document.getElementById("modalGpsStartText");
+      const endBox = document.getElementById("modalGpsEndText");
+      const auditBox = document.getElementById("modalActualAuditText");
+
+      if (shift.gpsStart && shift.gpsStart.lat) {
+        const lat = shift.gpsStart.lat;
+        const lng = shift.gpsStart.lng;
+        startBox.innerHTML = `
+          🟢 <strong>Старт:</strong> 
+          <a class="gps-link-btn" href="https://maps.google.com/?q=${lat},${lng}" target="_blank">Google Maps</a> | 
+          <a class="gps-link-btn" href="https://yandex.ru/maps/?pt=${lng},${lat}&z=16&l=map" target="_blank">Яндекс Карты</a>
+          <span style="color:#94a3b8; font-size:11px;">(±${shift.gpsStart.acc || 10} м)</span>
+        `;
+      } else {
+        startBox.innerHTML = `🟢 <strong>Старт:</strong> <i>GPS не зафиксирован</i>`;
+      }
+
+      if (shift.gpsEnd && shift.gpsEnd.lat) {
+        const lat = shift.gpsEnd.lat;
+        const lng = shift.gpsEnd.lng;
+        endBox.innerHTML = `
+          🏁 <strong>Финиш:</strong> 
+          <a class="gps-link-btn" href="https://maps.google.com/?q=${lat},${lng}" target="_blank">Google Maps</a> | 
+          <a class="gps-link-btn" href="https://yandex.ru/maps/?pt=${lng},${lat}&z=16&l=map" target="_blank">Яндекс Карты</a>
+          <span style="color:#94a3b8; font-size:11px;">(±${shift.gpsEnd.acc || 10} м)</span>
+        `;
+      } else {
+        endBox.innerHTML = `🏁 <strong>Финиш:</strong> <i>GPS не зафиксирован</i>`;
+      }
+
+      // Сверка фактического времени отметки с заявленным временем начала работы
+      const declaredS = shift.declaredStart || shift.start || "—";
+      const pressS = shift.actualPressStart || "—";
+      const delayS = shift.startDelayText ? ` (${shift.startDelayText})` : "";
+
+      const declaredE = shift.declaredEnd || shift.end || "—";
+      const pressE = shift.actualPressEnd || "—";
+      const delayE = shift.endDelayText ? ` (${shift.endDelayText})` : "";
+
+      auditBox.innerHTML = `
+        <div style="font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">⚖️ Сверка времени и аудит отписки:</div>
+        <div style="margin-bottom: 3px;">
+          • <strong>СТАРТ:</strong> заявлено с <strong>${declaredS}</strong>, отметка отправлена в <strong>${pressS}</strong>
+          <span style="color: ${shift.isStartDelayed ? '#f87171' : '#4ade80'}; font-weight: 600;">${delayS}</span>
+        </div>
+        <div>
+          • <strong>ФИНИШ:</strong> заявлено до <strong>${declaredE}</strong>, отметка отправлена в <strong>${pressE}</strong>
+          <span style="color: ${shift.isEndDelayed ? '#f87171' : '#4ade80'}; font-weight: 600;">${delayE}</span>
+        </div>
+      `;
+
+      document.getElementById("editModal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("editModal").classList.remove("open");
+    }
+
+    function saveModalEdit() {
+      const key = `${currentYear}-${currentMonth}-${editingDay}_${editingEmpId}`;
+      const obj = document.getElementById("modalObject").value.trim();
+      const start = document.getElementById("modalTimeStart").value;
+      const end = document.getElementById("modalTimeEnd").value;
+
+      const existing = shiftsDb[key] || {};
+
+      shiftsDb[key] = {
+        object: obj,
+        start: start,
+        end: end,
+        total: 0,
+        overtime: 0,
+        gpsStart: existing.gpsStart || null,
+        gpsEnd: existing.gpsEnd || null
+      };
+
+      calculateShiftHours(shiftsDb[key]);
+      saveState();
+      closeModal();
+      renderMatrixTable();
+      renderForemanWorkers();
+      showToast("Данные сохранены");
+    }
+
+    /* ==============================================================
+       ВКЛАДКА СТАВОК И ССЫЛОК
+       ============================================================== */
+    function renderSettingsTable() {
+      const tbody = document.getElementById("linksTableBody");
+      const baseUrl = window.location.origin + window.location.pathname;
+
+      if (employees.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Список пуст. Добавьте первого сотрудника через форму выше.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = employees.map(emp => `
+        <tr>
+          <td><strong>${emp.name}</strong> (ID ${emp.id})</td>
+          <td style="color: var(--text-muted);">${emp.role}</td>
+          <td>
+            <input type="number" class="rate-input" value="${emp.rate}" onchange="updateRate(${emp.id}, this.value)"> ₽/час
+          </td>
+          <td>
+            <button class="copy-link-btn" onclick="copyLink('${baseUrl}?worker=${emp.id}')">📋 Ссылка работника</button>
+          </td>
+          <td>
+            <button class="btn-small" style="background: #dc2626; padding: 4px 8px;" onclick="removeEmployee(${emp.id})">✕</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function addNewEmployee() {
+      const name = document.getElementById("newEmpName").value.trim();
+      const role = document.getElementById("newEmpRole").value.trim() || "Рабочий";
+      const rate = parseFloat(document.getElementById("newEmpRate").value) || 500;
+
+      if (!name) {
+        showToast("⚠️ Введите имя сотрудника");
+        return;
+      }
+
+      const nextId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+      employees.push({
+        id: nextId,
+        name: name,
+        role: role,
+        rate: rate,
+        premium: 0
+      });
+
+      document.getElementById("newEmpName").value = "";
+      document.getElementById("newEmpRole").value = "";
+      saveState();
+      renderSettingsTable();
+      renderForemanWorkers();
+      renderMatrixTable();
+      showToast(`Сотрудник ${name} добавлен`);
+    }
+
+    function removeEmployee(id) {
+      if (confirm("Удалить сотрудника из бригады?")) {
+        employees = employees.filter(e => e.id !== id);
+        saveState();
+        renderSettingsTable();
+        renderForemanWorkers();
+        renderMatrixTable();
+        showToast("Сотрудник удален");
+      }
+    }
+
+    function updateRate(id, newRate) {
+      const emp = employees.find(e => e.id === id);
+      if (emp) {
+        emp.rate = parseFloat(newRate) || 0;
+        saveState();
+        renderMatrixTable();
+        showToast(`Ставка для ${emp.name} обновлена`);
+      }
+    }
+
+    function copyLink(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        showToast("Ссылка скопирована в буфер");
+      });
+    }
+
+    function copyForemanLink() {
+      const url = window.location.origin + window.location.pathname + "?role=foreman";
+      copyLink(url);
+    }
+
+    /* ==============================================================
+       СКАЧИВАНИЕ САМОГО САЙТА И РЕЗЕРВНОЙ КОПИИ
+       ============================================================== */
+    function downloadHtmlFile() {
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "index.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("Файл index.html скачан на устройство");
+    }
+
+    function exportDatabaseJson() {
+      const backup = {
+        shiftsDb,
+        employees,
+        objectsList,
+        receiptsDb,
+        certsDb,
+        exportedAt: new Date().toISOString()
+      };
+      const json = JSON.stringify(backup, null, 2);
+      const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Табель_Бэкап_${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("Резервная копия скачана в JSON");
+    }
+
+    function importDatabaseJson(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.shiftsDb) shiftsDb = data.shiftsDb;
+          if (data.employees) employees = data.employees;
+          if (data.objectsList) objectsList = data.objectsList;
+          if (data.receiptsDb) receiptsDb = data.receiptsDb;
+          if (data.certsDb) certsDb = data.certsDb;
+
+          saveState();
+          renderMatrixTable();
+          renderSettingsTable();
+          renderForemanWorkers();
+          renderForemanObjects();
+          renderReceiptsRegistry();
+          renderCertsRegistry();
+          showToast("Данные успешно восстановлены из файла");
+        } catch (err) {
+          showToast("⚠️ Ошибка: файл повреждён или не является бэкапом");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* ==============================================================
+       ВЫГРУЗКА В EXCEL (CSV С BOM И GPS ССЫЛКАМИ)
+       ============================================================== */
+    function exportToExcel() {
+      const daysCount = getDaysInMonth(currentYear, currentMonth);
+      let csv = "\uFEFF"; // UTF-8 BOM
+
+      csv += "Сотрудник;Должность;Параметр;";
+      for (let d = 1; d <= daysCount; d++) {
+        csv += `${d} ${MONTH_NAMES[currentMonth]};;`;
+      }
+      csv += "Всего часов;Доп. часов;Премия;Итого к оплате;Заработано всего\n";
+
+      employees.forEach(emp => {
+        let sumTotal = 0;
+        let sumOvertime = 0;
+        let sumEarned = 0;
+
+        for (let d = 1; d <= daysCount; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          if (shift) {
+            sumTotal += (shift.total || 0);
+            sumOvertime += (shift.overtime || 0);
+            sumEarned += Math.round((shift.total || 0) * emp.rate);
+          }
+        }
+
+        // 1. Строка объекта
+        csv += `${emp.name};${emp.role};Объект;`;
+        for (let d = 1; d <= daysCount; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          csv += `${shift ? shift.object : ""};;`;
+        }
+        csv += `${sumTotal.toFixed(1)};${sumOvertime.toFixed(1)};${emp.premium};${sumEarned + emp.premium};${sumEarned}\n`;
+
+        // 2. Строка времени
+        csv += `;;Время;`;
+        for (let d = 1; d <= daysCount; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          csv += `${shift ? shift.start : ""};${shift ? shift.end : ""};`;
+        }
+        csv += `\n`;
+
+        // 3. Строка GPS ссылок
+        csv += `;;GPS_Карта;`;
+        for (let d = 1; d <= daysCount; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          let mapUrl = "";
+          if (shift && shift.gpsStart && shift.gpsStart.lat) {
+            mapUrl = `https://maps.google.com/?q=${shift.gpsStart.lat},${shift.gpsStart.lng}`;
+          }
+          csv += `${mapUrl};;`;
+        }
+        csv += `\n`;
+
+        // 4. Строка общих часов
+        csv += `;;Общее;`;
+        for (let d = 1; d <= daysCount; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          csv += `${shift && shift.total ? shift.total.toFixed(1) : "0"};;`;
+        }
+        csv += `\n`;
+
+        // 5. Строка сверхурочных
+        csv += `;;Дополнительные;`;
+        for (let d = 1; d <= daysCount; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          csv += `${shift && shift.overtime ? shift.overtime.toFixed(1) : "0"};;`;
+        }
+        csv += `\n`;
+
+        // 6. Строка заработка
+        csv += `;;Заработал;`;
+        for (let d = 1; d <= daysCount; d++) {
+          const shift = shiftsDb[`${currentYear}-${currentMonth}-${d}_${emp.id}`];
+          const earned = shift && shift.total ? Math.round(shift.total * emp.rate) : 0;
+          csv += `${earned};;`;
+        }
+        csv += `\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Табель_GPS_${MONTH_NAMES[currentMonth]}_${currentYear}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Табель с GPS выгружен в CSV");
+    }
+
+    /* ==============================================================
+       СЛУЖЕБНЫЕ МЕТОДЫ
+       ============================================================== */
+    function switchTab(tabId) {
+      document.querySelectorAll(".view-container").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
+
+      document.getElementById(`view-${tabId}`).classList.add("active");
+      
+      const btns = document.querySelectorAll(".nav-btn");
+      if (tabId === "foreman") btns[0].classList.add("active");
+      if (tabId === "certificates") btns[1].classList.add("active");
+      if (tabId === "receipts") btns[2].classList.add("active");
+      if (tabId === "matrix") btns[3].classList.add("active");
+      if (tabId === "settings") btns[4].classList.add("active");
+
+      if (tabId === "matrix") renderMatrixTable();
+      if (tabId === "receipts") renderReceiptsRegistry();
+      if (tabId === "certificates") renderCertsRegistry();
+    }
+
+    function vibratePhone(ms) {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2500);
+    }
+
+    function saveState() {
+      localStorage.setItem("tabel_shifts_db", JSON.stringify(shiftsDb));
+      localStorage.setItem("tabel_employees", JSON.stringify(employees));
+      localStorage.setItem("tabel_objects", JSON.stringify(objectsList));
+      localStorage.setItem("tabel_receipts_db", JSON.stringify(receiptsDb));
+      localStorage.setItem("tabel_certs_db", JSON.stringify(certsDb));
+    }
+
+    function loadState() {
+      const s = localStorage.getItem("tabel_shifts_db");
+      const e = localStorage.getItem("tabel_employees");
+      const o = localStorage.getItem("tabel_objects");
+      const r = localStorage.getItem("tabel_receipts_db");
+      const c = localStorage.getItem("tabel_certs_db");
+
+      if (s) shiftsDb = JSON.parse(s);
+      if (e) employees = JSON.parse(e);
+      if (o) objectsList = JSON.parse(o);
+      if (r) receiptsDb = JSON.parse(r);
+      if (c) certsDb = JSON.parse(c);
+    }
+  </script>
+
+</body></html>
